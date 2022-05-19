@@ -25,5 +25,9 @@ namespace GameFramework.Network
         /// 给webgl专用的websocket
         /// </summary>
         Websocket,
+        /// <summary>
+        /// 给webgl专用的websocket
+        /// </summary>
+        Http,
     }
 }
