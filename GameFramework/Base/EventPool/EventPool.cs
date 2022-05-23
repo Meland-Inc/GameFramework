@@ -278,7 +278,8 @@ namespace GameFramework
 
             if (noHandlerException)
             {
-                throw new GameFrameworkException(Utility.Text.Format("Event '{0}' not allow no handler.", e.Id));
+                // throw new GameFrameworkException(Utility.Text.Format("Event '{0}' not allow no handler.", e.Id));
+                //close error throw in develop period
             }
         }
     }
