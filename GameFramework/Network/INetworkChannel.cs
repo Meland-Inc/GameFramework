@@ -206,6 +206,21 @@ namespace GameFramework.Network
         void Connect(IPAddress ipAddress, int port, object userData);
 
         /// <summary>
+        /// 通过域名或ip连接到远程主机。
+        /// </summary>
+        /// <param name="targetAddress">远程主机的 IP（域名） 地址。</param>
+        /// <param name="port">远程主机的端口号。</param>
+        void Connect(string ipAddress);
+
+        /// <summary>
+        /// 通过域名或ip连接到远程主机。
+        /// </summary>
+        /// <param name="targetAddress">远程主机的 IP（域名） 地址。</param>
+        /// <param name="port">远程主机的端口号。</param>
+        /// <param name="userData">用户自定义数据。</param>
+        void Connect(string targetAddress, object userData);
+
+        /// <summary>
         /// 关闭网络频道。
         /// </summary>
         void Close();

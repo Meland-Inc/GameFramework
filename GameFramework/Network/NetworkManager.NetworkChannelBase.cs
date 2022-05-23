@@ -390,6 +390,16 @@ namespace GameFramework.Network
                 m_ReceiveState.PrepareForPacketHeader(m_NetworkChannelHelper.PacketHeaderLength);
             }
 
+            public void Connect(string targetAddress, object userData)
+            {
+                Connect(targetAddress, null);
+            }
+
+            public void Connect(string ipAddress)
+            {
+                throw new GameFrameworkException("Not supported connect by ip address string.");
+            }
+
             /// <summary>
             /// 关闭连接并释放所有相关资源。
             /// </summary>
