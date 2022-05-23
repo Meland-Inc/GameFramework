@@ -15,7 +15,7 @@ namespace GameFramework.Network
     internal sealed partial class NetworkManager : GameFrameworkModule, INetworkManager
     {
         /// <summary>
-        /// 网络频道基类。
+        /// 网络频道基类-走socket io方式。
         /// </summary>
         private abstract class NetworkChannelBase : INetworkChannel, IDisposable
         {
@@ -24,7 +24,7 @@ namespace GameFramework.Network
             private readonly string m_Name;
             protected readonly Queue<Packet> m_SendPacketPool;
             protected readonly EventPool<Packet> m_ReceivePacketPool;
-            protected readonly INetworkChannelHelper m_NetworkChannelHelper;
+            protected readonly INetworkChannelStreamHelper m_NetworkChannelHelper;
             protected AddressFamily m_AddressFamily;
             protected bool m_ResetHeartBeatElapseSecondsWhenReceivePacket;
             protected float m_HeartBeatInterval;
@@ -37,18 +37,18 @@ namespace GameFramework.Network
             protected bool m_Active;
             private bool m_Disposed;
 
-            public GameFrameworkAction<NetworkChannelBase, object> NetworkChannelConnected;
-            public GameFrameworkAction<NetworkChannelBase> NetworkChannelClosed;
-            public GameFrameworkAction<NetworkChannelBase, int> NetworkChannelMissHeartBeat;
-            public GameFrameworkAction<NetworkChannelBase, NetworkErrorCode, SocketError, string> NetworkChannelError;
-            public GameFrameworkAction<NetworkChannelBase, object> NetworkChannelCustomError;
+            public GameFrameworkAction<INetworkChannel, object> NetworkChannelConnected { get; set; }
+            public GameFrameworkAction<INetworkChannel> NetworkChannelClosed { get; set; }
+            public GameFrameworkAction<INetworkChannel, int> NetworkChannelMissHeartBeat { get; set; }
+            public GameFrameworkAction<INetworkChannel, NetworkErrorCode, SocketError, string> NetworkChannelError { get; set; }
+            public GameFrameworkAction<INetworkChannel, object> NetworkChannelCustomError { get; set; }
 
             /// <summary>
             /// 初始化网络频道基类的新实例。
             /// </summary>
             /// <param name="name">网络频道名称。</param>
             /// <param name="networkChannelHelper">网络频道辅助器。</param>
-            public NetworkChannelBase(string name, INetworkChannelHelper networkChannelHelper)
+            public NetworkChannelBase(string name, INetworkChannelStreamHelper networkChannelHelper)
             {
                 m_Name = name ?? string.Empty;
                 m_SendPacketPool = new Queue<Packet>();
@@ -225,6 +225,20 @@ namespace GameFramework.Network
                 get
                 {
                     return m_HeartBeatState.HeartBeatElapseSeconds;
+                }
+            }
+            public string LocalAddress
+            {
+                get
+                {
+                    return m_Socket != null ? m_Socket.LocalEndPoint.ToString() : "";
+                }
+            }
+            public string RemoteAddress
+            {
+                get
+                {
+                    return m_Socket != null ? m_Socket.RemoteEndPoint.ToString() : "";
                 }
             }
 
