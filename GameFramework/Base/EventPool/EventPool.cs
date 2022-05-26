@@ -274,11 +274,12 @@ namespace GameFramework
                 noHandlerException = true;
             }
 
+            int eventID = e.Id;
             ReferencePool.Release(e);
 
             if (noHandlerException)
             {
-                // throw new GameFrameworkException(Utility.Text.Format("Event '{0}' not allow no handler.", e.Id));
+                // throw new GameFrameworkException(Utility.Text.Format("Event '{0}' not allow no handler.", eventID));
                 //close error throw in develop period
             }
         }
