@@ -21,6 +21,7 @@ namespace GameFramework.Entity
             private readonly IEntityGroupHelper m_EntityGroupHelper;
             private readonly IObjectPool<EntityInstanceObject> m_InstancePool;
             private readonly GameFrameworkLinkedList<IEntity> m_Entities;
+            private readonly Dictionary<int, LinkedListNode<IEntity>> m_EntitiesMap;
             private LinkedListNode<IEntity> m_CachedNode;
 
             /// <summary>
@@ -50,6 +51,7 @@ namespace GameFramework.Entity
                 m_InstancePool = objectPoolManager.CreateSingleSpawnObjectPool<EntityInstanceObject>(Utility.Text.Format("Entity Instance Pool ({0})", name), instanceCapacity, instanceExpireTime, instancePriority);
                 m_InstancePool.AutoReleaseInterval = instanceAutoReleaseInterval;
                 m_Entities = new GameFrameworkLinkedList<IEntity>();
+                m_EntitiesMap = new Dictionary<int, LinkedListNode<IEntity>>();
                 m_CachedNode = null;
             }
 
@@ -170,19 +172,11 @@ namespace GameFramework.Entity
             /// <returns>实体组中是否存在实体。</returns>
             public bool HasEntity(int entityId)
             {
-                foreach (IEntity entity in m_Entities)
-                {
-                    if (entity.Id == entityId)
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
+                return m_EntitiesMap.ContainsKey(entityId);
             }
 
             /// <summary>
-            /// 实体组中是否存在实体。
+            /// 实体组中是否存在实体。 慎用！！ 有性能开销
             /// </summary>
             /// <param name="entityAssetName">实体资源名称。</param>
             /// <returns>实体组中是否存在实体。</returns>
@@ -211,19 +205,16 @@ namespace GameFramework.Entity
             /// <returns>要获取的实体。</returns>
             public IEntity GetEntity(int entityId)
             {
-                foreach (IEntity entity in m_Entities)
+                if (m_EntitiesMap.TryGetValue(entityId, out LinkedListNode<IEntity> node))
                 {
-                    if (entity.Id == entityId)
-                    {
-                        return entity;
-                    }
+                    return node.Value;
                 }
 
                 return null;
             }
 
             /// <summary>
-            /// 从实体组中获取实体。
+            /// 从实体组中获取实体。 慎用！！ 有性能开销
             /// </summary>
             /// <param name="entityAssetName">实体资源名称。</param>
             /// <returns>要获取的实体。</returns>
@@ -246,7 +237,7 @@ namespace GameFramework.Entity
             }
 
             /// <summary>
-            /// 从实体组中获取实体。
+            /// 从实体组中获取实体。 慎用！！ 有性能开销
             /// </summary>
             /// <param name="entityAssetName">实体资源名称。</param>
             /// <returns>要获取的实体。</returns>
@@ -297,7 +288,7 @@ namespace GameFramework.Entity
             }
 
             /// <summary>
-            /// 从实体组中获取所有实体。
+            /// 从实体组中获取所有实体。 慎用！！ 有性能开销
             /// </summary>
             /// <returns>实体组中的所有实体。</returns>
             public IEntity[] GetAllEntities()
@@ -312,7 +303,7 @@ namespace GameFramework.Entity
             }
 
             /// <summary>
-            /// 从实体组中获取所有实体。
+            /// 从实体组中获取所有实体。 慎用！！ 有性能开销
             /// </summary>
             /// <param name="results">实体组中的所有实体。</param>
             public void GetAllEntities(List<IEntity> results)
@@ -335,7 +326,13 @@ namespace GameFramework.Entity
             /// <param name="entity">要增加的实体。</param>
             public void AddEntity(IEntity entity)
             {
-                m_Entities.AddLast(entity);
+                if (m_EntitiesMap.ContainsKey(entity.Id))
+                {
+                    throw new GameFrameworkException("Entity is already exist.");
+                }
+
+                LinkedListNode<IEntity> node = m_Entities.AddLast(entity);
+                m_EntitiesMap.Add(entity.Id, node);
             }
 
             /// <summary>
@@ -344,12 +341,11 @@ namespace GameFramework.Entity
             /// <param name="entity">要移除的实体。</param>
             public void RemoveEntity(IEntity entity)
             {
-                if (m_CachedNode != null && m_CachedNode.Value == entity)
+                if (m_EntitiesMap.Remove(entity.Id, out LinkedListNode<IEntity> node))
                 {
-                    m_CachedNode = m_CachedNode.Next;
+                    m_Entities.Remove(node);
                 }
-
-                if (!m_Entities.Remove(entity))
+                else
                 {
                     throw new GameFrameworkException(Utility.Text.Format("Entity group '{0}' not exists specified entity '[{1}]{2}'.", m_Name, entity.Id, entity.EntityAssetName));
                 }
