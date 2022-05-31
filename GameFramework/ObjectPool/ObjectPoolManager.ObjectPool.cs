@@ -23,7 +23,7 @@ namespace GameFramework.ObjectPool
             /// - 但是在池满后释放对象会立即释放该对象 而不会去重新看过期时间和优先级
             /// - 在生成对象时如果超过容量了也不会立马去释放池 会等到自动释放的时候再统一释放
             /// </summary>
-            private static bool s_enableFastSimplyRelease = true;
+            private bool m_enableFastSimplyRelease;
             private readonly GameFrameworkMultiDictionary<string, Object<T>> m_Objects;
             private readonly Dictionary<object, Object<T>> m_ObjectMap;
             private readonly ReleaseObjectFilterCallback<T> m_DefaultReleaseObjectFilterCallback;
@@ -59,6 +59,7 @@ namespace GameFramework.ObjectPool
                 ExpireTime = expireTime;
                 m_Priority = priority;
                 m_AutoReleaseTime = 0f;
+                m_enableFastSimplyRelease = true;//TODO:默认打开 需要外部传入
             }
 
             /// <summary>
@@ -206,7 +207,7 @@ namespace GameFramework.ObjectPool
                 m_ObjectMap.Add(obj.Target, internalObject);
 
                 //没有启用高性能模式下才每次去找到一个合适释放的对象去释放  否则这里超过上限就超过 统一等自动释放时机到了再去释放
-                if (!s_enableFastSimplyRelease)
+                if (!m_enableFastSimplyRelease)
                 {
                     if (Count > m_Capacity)
                     {
@@ -318,7 +319,7 @@ namespace GameFramework.ObjectPool
                     internalObject.Unspawn();
                     if (Count > m_Capacity && internalObject.SpawnCount <= 0)
                     {
-                        if (s_enableFastSimplyRelease)
+                        if (m_enableFastSimplyRelease)
                         {
                             _ = ReleaseObject(internalObject.Peek());
                         }
