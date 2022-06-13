@@ -175,28 +175,28 @@ namespace GameFramework.Entity
                 return m_EntitiesMap.ContainsKey(entityId);
             }
 
-            /// <summary>
-            /// 实体组中是否存在实体。 慎用！！ 有性能开销
-            /// </summary>
-            /// <param name="entityAssetName">实体资源名称。</param>
-            /// <returns>实体组中是否存在实体。</returns>
-            public bool HasEntity(string entityAssetName)
-            {
-                if (string.IsNullOrEmpty(entityAssetName))
-                {
-                    throw new GameFrameworkException("Entity asset name is invalid.");
-                }
+            // /// <summary>
+            // /// 实体组中是否存在实体。 慎用！！ 有性能开销
+            // /// </summary>
+            // /// <param name="entityAssetName">实体资源名称。</param>
+            // /// <returns>实体组中是否存在实体。</returns>
+            // public bool HasEntity(string entityAssetName)
+            // {
+            //     if (string.IsNullOrEmpty(entityAssetName))
+            //     {
+            //         throw new GameFrameworkException("Entity asset name is invalid.");
+            //     }
 
-                foreach (IEntity entity in m_Entities)
-                {
-                    if (entity.EntityAssetName == entityAssetName)
-                    {
-                        return true;
-                    }
-                }
+            //     foreach (IEntity entity in m_Entities)
+            //     {
+            //         if (entity.EntityAssetName == entityAssetName)
+            //         {
+            //             return true;
+            //         }
+            //     }
 
-                return false;
-            }
+            //     return false;
+            // }
 
             /// <summary>
             /// 从实体组中获取实体。
@@ -213,79 +213,79 @@ namespace GameFramework.Entity
                 return null;
             }
 
-            /// <summary>
-            /// 从实体组中获取实体。 慎用！！ 有性能开销
-            /// </summary>
-            /// <param name="entityAssetName">实体资源名称。</param>
-            /// <returns>要获取的实体。</returns>
-            public IEntity GetEntity(string entityAssetName)
-            {
-                if (string.IsNullOrEmpty(entityAssetName))
-                {
-                    throw new GameFrameworkException("Entity asset name is invalid.");
-                }
+            // /// <summary>
+            // /// 从实体组中获取实体。 慎用！！ 有性能开销
+            // /// </summary>
+            // /// <param name="entityAssetName">实体资源名称。</param>
+            // /// <returns>要获取的实体。</returns>
+            // public IEntity GetEntity(string entityAssetName)
+            // {
+            //     if (string.IsNullOrEmpty(entityAssetName))
+            //     {
+            //         throw new GameFrameworkException("Entity asset name is invalid.");
+            //     }
 
-                foreach (IEntity entity in m_Entities)
-                {
-                    if (entity.EntityAssetName == entityAssetName)
-                    {
-                        return entity;
-                    }
-                }
+            //     foreach (IEntity entity in m_Entities)
+            //     {
+            //         if (entity.EntityAssetName == entityAssetName)
+            //         {
+            //             return entity;
+            //         }
+            //     }
 
-                return null;
-            }
+            //     return null;
+            // }
 
-            /// <summary>
-            /// 从实体组中获取实体。 慎用！！ 有性能开销
-            /// </summary>
-            /// <param name="entityAssetName">实体资源名称。</param>
-            /// <returns>要获取的实体。</returns>
-            public IEntity[] GetEntities(string entityAssetName)
-            {
-                if (string.IsNullOrEmpty(entityAssetName))
-                {
-                    throw new GameFrameworkException("Entity asset name is invalid.");
-                }
+            // /// <summary>
+            // /// 从实体组中获取实体。 慎用！！ 有性能开销
+            // /// </summary>
+            // /// <param name="entityAssetName">实体资源名称。</param>
+            // /// <returns>要获取的实体。</returns>
+            // public IEntity[] GetEntities(string entityAssetName)
+            // {
+            //     if (string.IsNullOrEmpty(entityAssetName))
+            //     {
+            //         throw new GameFrameworkException("Entity asset name is invalid.");
+            //     }
 
-                List<IEntity> results = new List<IEntity>();
-                foreach (IEntity entity in m_Entities)
-                {
-                    if (entity.EntityAssetName == entityAssetName)
-                    {
-                        results.Add(entity);
-                    }
-                }
+            //     List<IEntity> results = new List<IEntity>();
+            //     foreach (IEntity entity in m_Entities)
+            //     {
+            //         if (entity.EntityAssetName == entityAssetName)
+            //         {
+            //             results.Add(entity);
+            //         }
+            //     }
 
-                return results.ToArray();
-            }
+            //     return results.ToArray();
+            // }
 
-            /// <summary>
-            /// 从实体组中获取实体。
-            /// </summary>
-            /// <param name="entityAssetName">实体资源名称。</param>
-            /// <param name="results">要获取的实体。</param>
-            public void GetEntities(string entityAssetName, List<IEntity> results)
-            {
-                if (string.IsNullOrEmpty(entityAssetName))
-                {
-                    throw new GameFrameworkException("Entity asset name is invalid.");
-                }
+            // /// <summary>
+            // /// 从实体组中获取实体。
+            // /// </summary>
+            // /// <param name="entityAssetName">实体资源名称。</param>
+            // /// <param name="results">要获取的实体。</param>
+            // public void GetEntities(string entityAssetName, List<IEntity> results)
+            // {
+            //     if (string.IsNullOrEmpty(entityAssetName))
+            //     {
+            //         throw new GameFrameworkException("Entity asset name is invalid.");
+            //     }
 
-                if (results == null)
-                {
-                    throw new GameFrameworkException("Results is invalid.");
-                }
+            //     if (results == null)
+            //     {
+            //         throw new GameFrameworkException("Results is invalid.");
+            //     }
 
-                results.Clear();
-                foreach (IEntity entity in m_Entities)
-                {
-                    if (entity.EntityAssetName == entityAssetName)
-                    {
-                        results.Add(entity);
-                    }
-                }
-            }
+            //     results.Clear();
+            //     foreach (IEntity entity in m_Entities)
+            //     {
+            //         if (entity.EntityAssetName == entityAssetName)
+            //         {
+            //             results.Add(entity);
+            //         }
+            //     }
+            // }
 
             /// <summary>
             /// 从实体组中获取所有实体。 慎用！！ 有性能开销
