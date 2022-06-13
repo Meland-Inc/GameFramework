@@ -18,7 +18,21 @@ namespace GameFramework.ObjectPool
         /// <typeparam name="T">对象类型。</typeparam>
         private sealed class ObjectPool<T> : ObjectPoolBase, IObjectPool<T> where T : ObjectBase
         {
+            /// <summary>
+            /// 启用快速高性能简单的释放特性 大规模对象池比较适合的方式
+            /// - 但是在池满后释放对象会立即释放该对象 而不会去重新看过期时间和优先级
+            /// - 在生成对象时如果超过容量了也不会立马去释放池 会等到自动释放的时候再统一释放
+            /// </summary>
+            private bool m_enableFastSimplyRelease;
             private readonly GameFrameworkMultiDictionary<string, Object<T>> m_Objects;
+            /// <summary>
+            /// 在m_enableFastSimplyRelease打开时有效 用来缓存快速查询未使用对象的表 该模式下会忽略过期时间和优先级等特性 但是自动释放时候还是会应用该策略
+            /// </summary>
+            private readonly Dictionary<string, GameFrameworkLinkedList<Object<T>>> m_unusedObjectMap;
+            /// <summary>
+            /// 在m_enableFastSimplyRelease打开时有效 为了辅助m_unusedObjectMap 加速查找 适用于大规模对象时 key为hashKey value为链表节点
+            /// </summary>
+            private readonly Dictionary<int, LinkedListNode<Object<T>>> m_unusedObjectNodeMap;
             private readonly Dictionary<object, Object<T>> m_ObjectMap;
             private readonly ReleaseObjectFilterCallback<T> m_DefaultReleaseObjectFilterCallback;
             private readonly List<T> m_CachedCanReleaseObjects;
@@ -43,6 +57,8 @@ namespace GameFramework.ObjectPool
                 : base(name)
             {
                 m_Objects = new GameFrameworkMultiDictionary<string, Object<T>>();
+                m_unusedObjectMap = new Dictionary<string, GameFrameworkLinkedList<Object<T>>>();
+                m_unusedObjectNodeMap = new Dictionary<int, LinkedListNode<Object<T>>>();
                 m_ObjectMap = new Dictionary<object, Object<T>>();
                 m_DefaultReleaseObjectFilterCallback = DefaultReleaseObjectFilterCallback;
                 m_CachedCanReleaseObjects = new List<T>();
@@ -53,6 +69,7 @@ namespace GameFramework.ObjectPool
                 ExpireTime = expireTime;
                 m_Priority = priority;
                 m_AutoReleaseTime = 0f;
+                m_enableFastSimplyRelease = true;//TODO:默认打开 需要外部传入
             }
 
             /// <summary>
@@ -199,9 +216,13 @@ namespace GameFramework.ObjectPool
                 m_Objects.Add(obj.Name, internalObject);
                 m_ObjectMap.Add(obj.Target, internalObject);
 
-                if (Count > m_Capacity)
+                //没有启用高性能模式下才每次去找到一个合适释放的对象去释放  否则这里超过上限就超过 统一等自动释放时机到了再去释放
+                if (!m_enableFastSimplyRelease)
                 {
-                    Release();
+                    if (Count > m_Capacity)
+                    {
+                        Release();
+                    }
                 }
             }
 
@@ -262,14 +283,44 @@ namespace GameFramework.ObjectPool
                     throw new GameFrameworkException("Name is invalid.");
                 }
 
-                GameFrameworkLinkedListRange<Object<T>> objectRange = default(GameFrameworkLinkedListRange<Object<T>>);
-                if (m_Objects.TryGetValue(name, out objectRange))
+                if (m_enableFastSimplyRelease)
                 {
-                    foreach (Object<T> internalObject in objectRange)
+                    if (m_AllowMultiSpawn)
                     {
-                        if (m_AllowMultiSpawn || !internalObject.IsInUse)
+                        GameFrameworkLinkedListRange<Object<T>> objectRange = default(GameFrameworkLinkedListRange<Object<T>>);
+                        if (m_Objects.TryGetValue(name, out objectRange))
                         {
-                            return internalObject.Spawn();
+                            return objectRange.First.Value.Spawn();
+                        }
+                    }
+                    else
+                    {
+                        if (m_unusedObjectMap.TryGetValue(name, out GameFrameworkLinkedList<Object<T>> linkList))
+                        {
+                            if (linkList.Count > 0)
+                            {
+                                Object<T> internalObject = linkList.First.Value;
+                                if (internalObject.IsInUse)
+                                {
+                                    throw new GameFrameworkException("flag unuse internal object is in using when Spawn.");
+                                }
+                                RemoveUnuseRecord(internalObject);
+                                return internalObject.Spawn();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    GameFrameworkLinkedListRange<Object<T>> objectRange = default(GameFrameworkLinkedListRange<Object<T>>);
+                    if (m_Objects.TryGetValue(name, out objectRange))
+                    {
+                        foreach (Object<T> internalObject in objectRange)
+                        {
+                            if (m_AllowMultiSpawn || !internalObject.IsInUse)
+                            {
+                                return internalObject.Spawn();
+                            }
                         }
                     }
                 }
@@ -306,15 +357,83 @@ namespace GameFramework.ObjectPool
                 if (internalObject != null)
                 {
                     internalObject.Unspawn();
+
+                    if (m_enableFastSimplyRelease && !internalObject.IsInUse)//只有未使用了才能添加未使用记录 需要考虑m_AllowMultiSpawn
+                    {
+                        AddUnuseRecord(internalObject);
+                    }
+
                     if (Count > m_Capacity && internalObject.SpawnCount <= 0)
                     {
-                        Release();
+                        if (m_enableFastSimplyRelease)
+                        {
+                            _ = ReleaseObject(internalObject.Peek());
+                        }
+                        else
+                        {
+                            Release();
+                        }
                     }
                 }
                 else
                 {
                     throw new GameFrameworkException(Utility.Text.Format("Can not find target in object pool '{0}', target type is '{1}', target value is '{2}'.", new TypeNamePair(typeof(T), Name), target.GetType().FullName, target));
                 }
+            }
+
+            /// <summary>
+            /// 添加一条未使用记录
+            /// </summary>
+            /// <param name="target"></param>
+            public void AddUnuseRecord(Object<T> target)
+            {
+                if (target == null)
+                {
+                    throw new GameFrameworkException("Target is invalid.");
+                }
+
+                int hash = target.GetHashCode();
+                if (m_unusedObjectNodeMap.ContainsKey(hash))
+                {
+                    throw new GameFrameworkException(Utility.Text.Format("add unuse repeated in object pool '{0}', target type is '{1}', target value is '{2}'.", new TypeNamePair(typeof(T), Name), target.GetType().FullName, target));
+                }
+
+                string name = target.Peek().Name;
+                if (!m_unusedObjectMap.TryGetValue(name, out GameFrameworkLinkedList<Object<T>> list))
+                {
+                    list = new GameFrameworkLinkedList<Object<T>>();
+                    m_unusedObjectMap.Add(name, list);
+                }
+                LinkedListNode<Object<T>> node = list.AddLast(target);
+                m_unusedObjectNodeMap.Add(hash, node);
+            }
+
+            /// <summary>
+            /// 移除一条未使用记录
+            /// </summary>
+            /// <param name="target"></param>
+            public void RemoveUnuseRecord(Object<T> target)
+            {
+                if (target == null)
+                {
+                    throw new GameFrameworkException("Target is invalid.");
+                }
+
+                int hash = target.GetHashCode();
+                if (!m_unusedObjectNodeMap.ContainsKey(hash))
+                {
+                    throw new GameFrameworkException(Utility.Text.Format("remove unuse not exist in object pool '{0}', target type is '{1}', target value is '{2}'.", new TypeNamePair(typeof(T), Name), target.GetType().FullName, target));
+                }
+
+                string name = target.Peek().Name;
+                if (!m_unusedObjectMap.TryGetValue(name, out GameFrameworkLinkedList<Object<T>> list))
+                {
+                    throw new GameFrameworkException(Utility.Text.Format("remove unuse exception not exist linkList in object pool '{0}', target type is '{1}', target value is '{2}'.", new TypeNamePair(typeof(T), Name), target.GetType().FullName, target));
+                }
+
+                LinkedListNode<Object<T>> node = m_unusedObjectNodeMap[hash];
+                list.Remove(node);
+                _ = m_unusedObjectNodeMap.Remove(hash);
             }
 
             /// <summary>
@@ -429,6 +548,11 @@ namespace GameFramework.ObjectPool
                 if (internalObject.IsInUse || internalObject.Locked || !internalObject.CustomCanReleaseFlag)
                 {
                     return false;
+                }
+
+                if (m_enableFastSimplyRelease)
+                {
+                    RemoveUnuseRecord(internalObject);
                 }
 
                 m_Objects.Remove(internalObject.Name, internalObject);
@@ -582,15 +706,44 @@ namespace GameFramework.ObjectPool
                 }
 
                 results.Clear();
-                foreach (KeyValuePair<object, Object<T>> objectInMap in m_ObjectMap)
+                if (m_enableFastSimplyRelease)
                 {
-                    Object<T> internalObject = objectInMap.Value;
-                    if (internalObject.IsInUse || internalObject.Locked || !internalObject.CustomCanReleaseFlag)
+                    bool haveIsUsed = false;
+                    foreach (GameFrameworkLinkedList<Object<T>> linkList in m_unusedObjectMap.Values)
                     {
-                        continue;
-                    }
+                        foreach (Object<T> internalObject in linkList)
+                        {
+                            if (internalObject.IsInUse)
+                            {
+                                haveIsUsed = true;
+                                continue;
+                            }
 
-                    results.Add(internalObject.Peek());
+                            if (internalObject.Locked || !internalObject.CustomCanReleaseFlag)
+                            {
+                                continue;
+                            }
+
+                            results.Add(internalObject.Peek());
+                        }
+                    }
+                    if (haveIsUsed)
+                    {
+                        throw new GameFrameworkException("Have IsUsed in unuse list when auto release.");
+                    }
+                }
+                else
+                {
+                    foreach (KeyValuePair<object, Object<T>> objectInMap in m_ObjectMap)
+                    {
+                        Object<T> internalObject = objectInMap.Value;
+                        if (internalObject.IsInUse || internalObject.Locked || !internalObject.CustomCanReleaseFlag)
+                        {
+                            continue;
+                        }
+
+                        results.Add(internalObject.Peek());
+                    }
                 }
             }
 
