@@ -86,6 +86,13 @@ namespace GameFramework.Resource
         /// <param name="isScene">要加载的资源是否是场景。</param>
         void LoadAsset(object resource, string assetName, Type assetType, bool isScene);
 
+
+        /// <summary>
+        /// 加载网络资源
+        /// </summary>
+        /// <param name="fullPath">要加载资源的完整路径名。</param>
+        void LoadWebAsset(string fullPath);
+
         /// <summary>
         /// 重置加载资源代理辅助器。
         /// </summary>

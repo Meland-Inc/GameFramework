@@ -23,11 +23,14 @@ namespace GameFramework.Resource
                 private IResourceHelper m_ResourceHelper;
                 private ResourceLoader m_ResourceLoader;
 
+                public bool IsWebObject { get; private set; }
+
                 public ResourceObject()
                 {
                     m_DependencyResources = new List<object>();
                     m_ResourceHelper = null;
                     m_ResourceLoader = null;
+                    IsWebObject = false;
                 }
 
                 public override bool CustomCanReleaseFlag
@@ -40,7 +43,7 @@ namespace GameFramework.Resource
                     }
                 }
 
-                public static ResourceObject Create(string name, object target, IResourceHelper resourceHelper, ResourceLoader resourceLoader)
+                public static ResourceObject Create(string name, object target, IResourceHelper resourceHelper, ResourceLoader resourceLoader, bool isWeb = false)
                 {
                     if (resourceHelper == null)
                     {
@@ -56,6 +59,7 @@ namespace GameFramework.Resource
                     resourceObject.Initialize(name, target);
                     resourceObject.m_ResourceHelper = resourceHelper;
                     resourceObject.m_ResourceLoader = resourceLoader;
+                    resourceObject.IsWebObject = isWeb;
                     return resourceObject;
                 }
 
@@ -65,6 +69,7 @@ namespace GameFramework.Resource
                     m_DependencyResources.Clear();
                     m_ResourceHelper = null;
                     m_ResourceLoader = null;
+                    IsWebObject = false;
                 }
 
                 public void AddDependencyResource(object dependencyResource)

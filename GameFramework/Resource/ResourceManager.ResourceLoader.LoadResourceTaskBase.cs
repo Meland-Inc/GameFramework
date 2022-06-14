@@ -142,7 +142,15 @@ namespace GameFramework.Resource
                 public void LoadMain(LoadResourceAgent agent, ResourceObject resourceObject)
                 {
                     m_ResourceObject = resourceObject;
-                    agent.Helper.LoadAsset(resourceObject.Target, AssetName, AssetType, IsScene);
+                    if (!m_ResourceObject.IsWebObject)
+                    {
+                        agent.Helper.LoadAsset(resourceObject.Target, AssetName, AssetType, IsScene);
+                    }
+                    else
+                    {
+                        agent.Helper.LoadWebAsset(AssetName);
+                    }
+
                 }
 
                 public virtual void OnLoadAssetSuccess(LoadResourceAgent agent, object asset, float duration)

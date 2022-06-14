@@ -5,7 +5,9 @@
 // Feedback: mailto:ellan@gameframework.cn
 //------------------------------------------------------------
 
+using System;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace GameFramework
 {
@@ -91,6 +93,19 @@ namespace GameFramework
                     return true;
                 }
                 catch
+                {
+                    return false;
+                }
+            }
+
+            public static bool IsUrl(string name)
+            {
+                try
+                {
+                    string Url = @"^http(s)?://(.)?";
+                    return Regex.IsMatch(name, Url);
+                }
+                catch (Exception)
                 {
                     return false;
                 }

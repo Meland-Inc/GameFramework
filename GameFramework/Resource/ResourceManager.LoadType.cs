@@ -47,7 +47,12 @@ namespace GameFramework.Resource
             /// <summary>
             /// 使用二进制解密方式加载。
             /// </summary>
-            LoadFromBinaryAndDecrypt
+            LoadFromBinaryAndDecrypt,
+
+            /// <summary>
+            /// 使用网络资源加载。
+            /// </summary>
+            LoadFromWebFile = 100,
         }
     }
 }
