@@ -21,6 +21,7 @@ namespace GameFramework.Resource
         private sealed partial class ResourceLoader
         {
             private const int CachedHashBytesLength = 4;
+            private readonly ResourceName WebAssetResourceName = new("WebAssetResourceName", "", "Web"); //网络资产资源名
 
             private readonly ResourceManager m_ResourceManager;
             private readonly TaskPool<LoadResourceTaskBase> m_TaskPool;
@@ -867,6 +868,11 @@ namespace GameFramework.Resource
                 }
 
                 AssetInfo assetInfo = m_ResourceManager.GetAssetInfo(assetName);
+                //检查是否为网络资产
+                if (assetInfo == null && Utility.Path.IsUrl(assetName))
+                {
+                    assetInfo = AddWebAssetInfo(assetName);
+                }
                 if (assetInfo == null)
                 {
                     return false;
@@ -880,6 +886,20 @@ namespace GameFramework.Resource
 
                 dependencyAssetNames = assetInfo.GetDependencyAssetNames();
                 return m_ResourceManager.m_ResourceMode == ResourceMode.UpdatableWhilePlaying ? true : resourceInfo.Ready;
+            }
+
+            private AssetInfo AddWebAssetInfo(string assetName)
+            {
+                ResourceInfo resourceInfo = m_ResourceManager.GetResourceInfo(WebAssetResourceName);
+                if (resourceInfo == null)
+                {
+                    resourceInfo = new(WebAssetResourceName, null, LoadType.LoadFromWebFile, 0, 0, 0, true, true);
+                    m_ResourceManager.m_ResourceInfos.Add(WebAssetResourceName, resourceInfo);
+                }
+                string[] dependencyAssetNames = { };
+                AssetInfo assetInfo = new(assetName, WebAssetResourceName, dependencyAssetNames);
+                m_ResourceManager.m_AssetInfos.Add(assetName, assetInfo);
+                return assetInfo;
             }
 
             private void DefaultDecryptResourceCallback(byte[] bytes, int startIndex, int count, string name, string variant, string extension, bool storageInReadOnly, string fileSystem, byte loadType, int length, int hashCode)

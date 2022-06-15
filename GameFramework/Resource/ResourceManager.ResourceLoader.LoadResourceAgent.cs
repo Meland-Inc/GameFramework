@@ -231,6 +231,10 @@ namespace GameFramework.Resource
                             m_Helper.ReadBytes(fullPath);
                         }
                     }
+                    else if (resourceInfo.LoadType == LoadType.LoadFromWebFile)
+                    {
+                        AddWebResourceObject();
+                    }
                     else
                     {
                         throw new GameFrameworkException(Utility.Text.Format("Resource load type '{0}' is not supported.", resourceInfo.LoadType));
@@ -355,6 +359,16 @@ namespace GameFramework.Resource
                 {
                     OnError(e.Status, e.ErrorMessage);
                 }
+
+                private void AddWebResourceObject()
+                {
+                    object resource = new();
+                    ResourceObject resourceObject = ResourceObject.Create(m_Task.ResourceInfo.ResourceName.Name, resource, m_ResourceHelper, m_ResourceLoader, true);
+                    m_ResourceLoader.m_ResourcePool.Register(resourceObject, true);
+                    _ = s_LoadingResourceNames.Remove(m_Task.ResourceInfo.ResourceName.Name);
+                    OnResourceObjectReady(resourceObject);
+                }
+
             }
         }
     }
