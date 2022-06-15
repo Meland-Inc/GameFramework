@@ -290,7 +290,13 @@ namespace GameFramework.ObjectPool
                         GameFrameworkLinkedListRange<Object<T>> objectRange = default(GameFrameworkLinkedListRange<Object<T>>);
                         if (m_Objects.TryGetValue(name, out objectRange))
                         {
-                            return objectRange.First.Value.Spawn();
+                            Object<T> internalObject = objectRange.First.Value;
+                            //如果刚好拿到的是未使用的 需要从未使用列表中删除
+                            if (!internalObject.IsInUse)
+                            {
+                                RemoveUnuseRecord(internalObject);
+                            }
+                            return internalObject.Spawn();
                         }
                     }
                     else
