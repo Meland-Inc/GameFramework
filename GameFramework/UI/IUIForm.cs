@@ -1,4 +1,5 @@
-﻿//------------------------------------------------------------
+﻿
+//------------------------------------------------------------
 // Game Framework
 // Copyright © 2013-2021 Jiang Yin. All rights reserved.
 // Homepage: https://gameframework.cn/
@@ -70,6 +71,7 @@ namespace GameFramework.UI
         /// <param name="isNewInstance">是否是新实例。</param>
         /// <param name="userData">用户自定义数据。</param>
         void OnInit(int serialId, string uiFormAssetName, IUIGroup uiGroup, bool pauseCoveredUIForm, bool isNewInstance, object userData);
+        void OnDispose();
 
         /// <summary>
         /// 界面回收。
