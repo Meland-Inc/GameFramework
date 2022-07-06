@@ -1,4 +1,5 @@
-﻿//------------------------------------------------------------
+﻿
+//------------------------------------------------------------
 // Game Framework
 // Copyright © 2013-2021 Jiang Yin. All rights reserved.
 // Homepage: https://gameframework.cn/
@@ -21,6 +22,7 @@ namespace GameFramework.UI
         private readonly Dictionary<int, string> m_UIFormsBeingLoaded;
         private readonly HashSet<int> m_UIFormsToReleaseOnLoad;
         private readonly Queue<IUIForm> m_RecycleQueue;
+        private readonly Queue<IUIForm> m_DisposeQueue;
         private readonly LoadAssetCallbacks m_LoadAssetCallbacks;
         private IObjectPoolManager m_ObjectPoolManager;
         private IResourceManager m_ResourceManager;
@@ -43,6 +45,7 @@ namespace GameFramework.UI
             m_UIFormsBeingLoaded = new Dictionary<int, string>();
             m_UIFormsToReleaseOnLoad = new HashSet<int>();
             m_RecycleQueue = new Queue<IUIForm>();
+            m_DisposeQueue = new Queue<IUIForm>();
             m_LoadAssetCallbacks = new LoadAssetCallbacks(LoadAssetSuccessCallback, LoadAssetFailureCallback, LoadAssetUpdateCallback, LoadAssetDependencyAssetCallback);
             m_ObjectPoolManager = null;
             m_ResourceManager = null;
@@ -217,6 +220,12 @@ namespace GameFramework.UI
                 m_InstancePool.Unspawn(uiForm.Handle);
             }
 
+            while (m_DisposeQueue.Count > 0)
+            {
+                IUIForm uiForm = m_DisposeQueue.Dequeue();
+                uiForm.OnDispose();
+            }
+
             foreach (KeyValuePair<string, UIGroup> uiGroup in m_UIGroups)
             {
                 uiGroup.Value.Update(elapseSeconds, realElapseSeconds);
@@ -234,6 +243,7 @@ namespace GameFramework.UI
             m_UIFormsBeingLoaded.Clear();
             m_UIFormsToReleaseOnLoad.Clear();
             m_RecycleQueue.Clear();
+            m_DisposeQueue.Clear();
         }
 
         /// <summary>
@@ -773,11 +783,21 @@ namespace GameFramework.UI
         }
 
         /// <summary>
+        /// 关闭界面
+        /// </summary>
+        /// <param name="serialId">要关闭界面的序列编号。</param>
+        /// <param name="disposed">是否销毁该界面，false:进对象池，true:直接销毁</param>
+        public void CloseUIForm(int serialId, bool disposed)
+        {
+            CloseUIForm(serialId, null, disposed);
+        }
+
+        /// <summary>
         /// 关闭界面。
         /// </summary>
         /// <param name="serialId">要关闭界面的序列编号。</param>
         /// <param name="userData">用户自定义数据。</param>
-        public void CloseUIForm(int serialId, object userData)
+        public void CloseUIForm(int serialId, object userData, bool disposed = false)
         {
             if (IsLoadingUIForm(serialId))
             {
@@ -792,7 +812,7 @@ namespace GameFramework.UI
                 throw new GameFrameworkException(Utility.Text.Format("Can not find UI form '{0}'.", serialId));
             }
 
-            CloseUIForm(uiForm, userData);
+            CloseUIForm(uiForm, userData, disposed);
         }
 
         /// <summary>
@@ -808,8 +828,18 @@ namespace GameFramework.UI
         /// 关闭界面。
         /// </summary>
         /// <param name="uiForm">要关闭的界面。</param>
+        /// <param name="disposed">是否销毁该界面，false:进对象池，true:直接销毁</param>
+        public void CloseUIForm(IUIForm uiForm, bool disposed)
+        {
+            CloseUIForm(uiForm, null, disposed);
+        }
+
+        /// <summary>
+        /// 关闭界面。
+        /// </summary>
+        /// <param name="uiForm">要关闭的界面。</param>
         /// <param name="userData">用户自定义数据。</param>
-        public void CloseUIForm(IUIForm uiForm, object userData)
+        public void CloseUIForm(IUIForm uiForm, object userData, bool disposed = false)
         {
             if (uiForm == null)
             {
@@ -833,7 +863,14 @@ namespace GameFramework.UI
                 ReferencePool.Release(closeUIFormCompleteEventArgs);
             }
 
-            m_RecycleQueue.Enqueue(uiForm);
+            if (disposed)
+            {
+                m_DisposeQueue.Enqueue(uiForm);
+            }
+            else
+            {
+                m_RecycleQueue.Enqueue(uiForm);
+            }
         }
 
         /// <summary>

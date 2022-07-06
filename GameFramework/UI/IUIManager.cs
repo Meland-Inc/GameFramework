@@ -315,13 +315,20 @@ namespace GameFramework.UI
         /// </summary>
         /// <param name="serialId">要关闭界面的序列编号。</param>
         void CloseUIForm(int serialId);
+        /// <summary>
+        /// 关闭界面
+        /// </summary>
+        /// <param name="serialId">要关闭界面的序列编号。</param>
+        /// <param name="disposed">是否释放</param>
+        void CloseUIForm(int serialId, bool disposed);
 
         /// <summary>
         /// 关闭界面。
         /// </summary>
         /// <param name="serialId">要关闭界面的序列编号。</param>
         /// <param name="userData">用户自定义数据。</param>
-        void CloseUIForm(int serialId, object userData);
+        /// <param name="disposed">是否释放</param>
+        void CloseUIForm(int serialId, object userData, bool disposed = false);
 
         /// <summary>
         /// 关闭界面。
@@ -333,8 +340,16 @@ namespace GameFramework.UI
         /// 关闭界面。
         /// </summary>
         /// <param name="uiForm">要关闭的界面。</param>
+        /// <param name="disposed">是否释放</param>
+        void CloseUIForm(IUIForm uiForm, bool disposed);
+
+        /// <summary>
+        /// 关闭界面。
+        /// </summary>
+        /// <param name="uiForm">要关闭的界面。</param>
         /// <param name="userData">用户自定义数据。</param>
-        void CloseUIForm(IUIForm uiForm, object userData);
+        /// <param name="disposed">是否释放</param>
+        void CloseUIForm(IUIForm uiForm, object userData, bool disposed = false);
 
         /// <summary>
         /// 关闭所有已加载的界面。
