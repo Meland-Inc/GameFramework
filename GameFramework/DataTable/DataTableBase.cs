@@ -138,7 +138,7 @@ namespace GameFramework.DataTable
         /// 读取数据表。
         /// </summary>
         /// <param name="dataTableAssetName">数据表资源名称。</param>
-        public void ReadData(string dataTableAssetName)
+        public virtual void ReadData(string dataTableAssetName)
         {
             m_DataProvider.ReadData(dataTableAssetName);
         }
@@ -148,7 +148,7 @@ namespace GameFramework.DataTable
         /// </summary>
         /// <param name="dataTableAssetName">数据表资源名称。</param>
         /// <param name="priority">加载数据表资源的优先级。</param>
-        public void ReadData(string dataTableAssetName, int priority)
+        public virtual void ReadData(string dataTableAssetName, int priority)
         {
             m_DataProvider.ReadData(dataTableAssetName, priority);
         }
@@ -158,7 +158,7 @@ namespace GameFramework.DataTable
         /// </summary>
         /// <param name="dataTableAssetName">数据表资源名称。</param>
         /// <param name="userData">用户自定义数据。</param>
-        public void ReadData(string dataTableAssetName, object userData)
+        public virtual void ReadData(string dataTableAssetName, object userData)
         {
             m_DataProvider.ReadData(dataTableAssetName, userData);
         }
@@ -169,7 +169,7 @@ namespace GameFramework.DataTable
         /// <param name="dataTableAssetName">数据表资源名称。</param>
         /// <param name="priority">加载数据表资源的优先级。</param>
         /// <param name="userData">用户自定义数据。</param>
-        public void ReadData(string dataTableAssetName, int priority, object userData)
+        public virtual void ReadData(string dataTableAssetName, int priority, object userData)
         {
             m_DataProvider.ReadData(dataTableAssetName, priority, userData);
         }
@@ -179,7 +179,7 @@ namespace GameFramework.DataTable
         /// </summary>
         /// <param name="dataTableString">要解析的数据表字符串。</param>
         /// <returns>是否解析数据表成功。</returns>
-        public bool ParseData(string dataTableString)
+        public virtual bool ParseData(string dataTableString)
         {
             return m_DataProvider.ParseData(dataTableString);
         }
@@ -190,7 +190,7 @@ namespace GameFramework.DataTable
         /// <param name="dataTableString">要解析的数据表字符串。</param>
         /// <param name="userData">用户自定义数据。</param>
         /// <returns>是否解析数据表成功。</returns>
-        public bool ParseData(string dataTableString, object userData)
+        public virtual bool ParseData(string dataTableString, object userData)
         {
             return m_DataProvider.ParseData(dataTableString, userData);
         }
@@ -200,7 +200,7 @@ namespace GameFramework.DataTable
         /// </summary>
         /// <param name="dataTableBytes">要解析的数据表二进制流。</param>
         /// <returns>是否解析数据表成功。</returns>
-        public bool ParseData(byte[] dataTableBytes)
+        public virtual bool ParseData(byte[] dataTableBytes)
         {
             return m_DataProvider.ParseData(dataTableBytes);
         }
@@ -211,7 +211,7 @@ namespace GameFramework.DataTable
         /// <param name="dataTableBytes">要解析的数据表二进制流。</param>
         /// <param name="userData">用户自定义数据。</param>
         /// <returns>是否解析数据表成功。</returns>
-        public bool ParseData(byte[] dataTableBytes, object userData)
+        public virtual bool ParseData(byte[] dataTableBytes, object userData)
         {
             return m_DataProvider.ParseData(dataTableBytes, userData);
         }
@@ -223,7 +223,7 @@ namespace GameFramework.DataTable
         /// <param name="startIndex">数据表二进制流的起始位置。</param>
         /// <param name="length">数据表二进制流的长度。</param>
         /// <returns>是否解析数据表成功。</returns>
-        public bool ParseData(byte[] dataTableBytes, int startIndex, int length)
+        public virtual bool ParseData(byte[] dataTableBytes, int startIndex, int length)
         {
             return m_DataProvider.ParseData(dataTableBytes, startIndex, length);
         }
@@ -236,7 +236,7 @@ namespace GameFramework.DataTable
         /// <param name="length">数据表二进制流的长度。</param>
         /// <param name="userData">用户自定义数据。</param>
         /// <returns>是否解析数据表成功。</returns>
-        public bool ParseData(byte[] dataTableBytes, int startIndex, int length, object userData)
+        public virtual bool ParseData(byte[] dataTableBytes, int startIndex, int length, object userData)
         {
             return m_DataProvider.ParseData(dataTableBytes, startIndex, length, userData);
         }
@@ -291,7 +291,7 @@ namespace GameFramework.DataTable
         /// 设置数据提供者辅助器。
         /// </summary>
         /// <param name="dataProviderHelper">数据提供者辅助器。</param>
-        internal void SetDataProviderHelper(IDataProviderHelper<DataTableBase> dataProviderHelper)
+        internal virtual void SetDataProviderHelper(IDataProviderHelper<DataTableBase> dataProviderHelper)
         {
             m_DataProvider.SetDataProviderHelper(dataProviderHelper);
         }
