@@ -18,6 +18,7 @@ namespace GameFramework.Fsm
     {
         private T m_Owner;
         private readonly Dictionary<Type, FsmState<T>> m_States;
+        private readonly Dictionary<string, FsmState<T>> m_StatesNameMap;//按照名字存放的map
         private Dictionary<string, Variable> m_Datas;
         private FsmState<T> m_CurrentState;
         private float m_CurrentStateTime;
@@ -30,6 +31,7 @@ namespace GameFramework.Fsm
         {
             m_Owner = null;
             m_States = new Dictionary<Type, FsmState<T>>();
+            m_StatesNameMap = new Dictionary<string, FsmState<T>>();
             m_Datas = null;
             m_CurrentState = null;
             m_CurrentStateTime = 0f;
@@ -160,7 +162,13 @@ namespace GameFramework.Fsm
                     throw new GameFrameworkException(Utility.Text.Format("FSM '{0}' state '{1}' is already exist.", new TypeNamePair(typeof(T), name), stateType.FullName));
                 }
 
+                if (fsm.m_StatesNameMap.ContainsKey(state.StatusName))
+                {
+                    throw new GameFrameworkException(Utility.Text.Format("FSM '{0}' state '{1}' is already exist name.", new TypeNamePair(typeof(T), name), stateType.FullName));
+                }
+
                 fsm.m_States.Add(stateType, state);
+                fsm.m_StatesNameMap.Add(state.StatusName, state);
                 state.OnInit(fsm);
             }
 
@@ -203,7 +211,13 @@ namespace GameFramework.Fsm
                     throw new GameFrameworkException(Utility.Text.Format("FSM '{0}' state '{1}' is already exist.", new TypeNamePair(typeof(T), name), stateType.FullName));
                 }
 
+                if (fsm.m_StatesNameMap.ContainsKey(state.StatusName))
+                {
+                    throw new GameFrameworkException(Utility.Text.Format("FSM '{0}' state '{1}' is already exist name.", new TypeNamePair(typeof(T), name), stateType.FullName));
+                }
+
                 fsm.m_States.Add(stateType, state);
+                fsm.m_StatesNameMap.Add(state.StatusName, state);
                 state.OnInit(fsm);
             }
 
@@ -228,6 +242,7 @@ namespace GameFramework.Fsm
             Name = null;
             m_Owner = null;
             m_States.Clear();
+            m_StatesNameMap.Clear();
 
             if (m_Datas != null)
             {
@@ -314,6 +329,16 @@ namespace GameFramework.Fsm
         }
 
         /// <summary>
+        /// 通过名字查找是否存在状态
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public bool HasState(string name)
+        {
+            return m_StatesNameMap.ContainsKey(name);
+        }
+
+        /// <summary>
         /// 是否存在有限状态机状态。
         /// </summary>
         /// <param name="stateType">要检查的有限状态机状态类型。</param>
@@ -368,6 +393,26 @@ namespace GameFramework.Fsm
 
             FsmState<T> state = null;
             if (m_States.TryGetValue(stateType, out state))
+            {
+                return state;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 通过名字获取状态
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public FsmState<T> GetState(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new GameFrameworkException("State name is invalid.");
+            }
+
+            if (m_StatesNameMap.TryGetValue(name, out FsmState<T> state))
             {
                 return state;
             }
@@ -579,6 +624,31 @@ namespace GameFramework.Fsm
                 throw new GameFrameworkException(Utility.Text.Format("FSM '{0}' can not change state to '{1}' which is not exist.", new TypeNamePair(typeof(T), Name), stateType.FullName));
             }
 
+            ExecuteChangeStatus(state);
+        }
+
+        internal void ChangeState(string name)
+        {
+            if (m_CurrentState == null)
+            {
+                throw new GameFrameworkException("Current state is invalid.");
+            }
+
+            FsmState<T> state = GetState(name);
+            if (state == null)
+            {
+                throw new GameFrameworkException(Utility.Text.Format("FSM '{0}' can not change state to name '{1}' which is not exist.", new TypeNamePair(typeof(T), Name), name));
+            }
+
+            ExecuteChangeStatus(state);
+        }
+
+        /// <summary>
+        /// 执行切换状态
+        /// </summary>
+        /// <param name="state"></param>
+        private void ExecuteChangeStatus(FsmState<T> state)
+        {
             m_CurrentState.OnLeave(this, false);
             m_CurrentStateTime = 0f;
             m_CurrentState = state;

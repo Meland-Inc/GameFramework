@@ -16,6 +16,12 @@ namespace GameFramework.Fsm
     public abstract class FsmState<T> where T : class
     {
         /// <summary>
+        /// 状态名 使用名字切换状态时使用 默认为Type.name
+        /// </summary>
+        /// <returns></returns>
+        public virtual string StatusName => GetType().Name;
+
+        /// <summary>
         /// 初始化有限状态机状态基类的新实例。
         /// </summary>
         public FsmState()
@@ -105,6 +111,27 @@ namespace GameFramework.Fsm
             }
 
             fsmImplement.ChangeState(stateType);
+        }
+
+        /// <summary>
+        /// 通过名字切换状态
+        /// </summary>
+        /// <param name="fsm"></param>
+        /// <param name="name">状态名字</param>
+        protected void ChangeState(IFsm<T> fsm, string name)
+        {
+            Fsm<T> fsmImplement = (Fsm<T>)fsm;
+            if (fsmImplement == null)
+            {
+                throw new GameFrameworkException("FSM is invalid.");
+            }
+
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new GameFrameworkException("State name is invalid.");
+            }
+
+            fsmImplement.ChangeState(name);
         }
     }
 }
