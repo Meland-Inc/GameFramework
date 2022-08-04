@@ -270,15 +270,35 @@ namespace GameFramework.Fsm
         /// <typeparam name="TState">要开始的有限状态机状态类型。</typeparam>
         public void Start<TState>() where TState : FsmState<T>
         {
-            if (IsRunning)
-            {
-                throw new GameFrameworkException("FSM is running, can not start again.");
-            }
-
             FsmState<T> state = GetState<TState>();
             if (state == null)
             {
                 throw new GameFrameworkException(Utility.Text.Format("FSM '{0}' can not start state '{1}' which is not exist.", new TypeNamePair(typeof(T), Name), typeof(TState).FullName));
+            }
+
+            ExecuteStart(state);
+        }
+
+        /// <summary>
+        /// 通过名字开始有限状态机
+        /// </summary>
+        /// <param name="name"></param>
+        public void Start(string name)
+        {
+            FsmState<T> state = GetState(name);
+            if (state == null)
+            {
+                throw new GameFrameworkException(Utility.Text.Format("FSM '{0}' can not start state '{1}' which is not exist.", new TypeNamePair(typeof(T), Name), name));
+            }
+
+            ExecuteStart(state);
+        }
+
+        private void ExecuteStart(FsmState<T> state)
+        {
+            if (IsRunning)
+            {
+                throw new GameFrameworkException("FSM is running, can not start again.");
             }
 
             m_CurrentStateTime = 0f;
