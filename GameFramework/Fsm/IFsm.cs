@@ -85,7 +85,11 @@ namespace GameFramework.Fsm
         /// </summary>
         /// <typeparam name="TState">要开始的有限状态机状态类型。</typeparam>
         void Start<TState>() where TState : FsmState<T>;
-
+        /// <summary>
+        /// 通过名字开始有限状态机
+        /// </summary>
+        /// <param name="name"></param>
+        void Start(string name);
         /// <summary>
         /// 开始有限状态机。
         /// </summary>
