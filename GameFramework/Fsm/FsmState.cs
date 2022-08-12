@@ -133,5 +133,15 @@ namespace GameFramework.Fsm
 
             fsmImplement.ChangeState(name);
         }
+
+        /// <summary>
+        /// 给EventFunction专用的切换状态方法 其他地方不要用
+        /// </summary>
+        /// <param name="fsm"></param>
+        /// <param name="name">状态名字</param>
+        public void EventFuncChangeState(IFsm<T> fsm, string name)
+        {
+            ChangeState(fsm, name);
+        }
     }
 }
