@@ -241,5 +241,9 @@ namespace GameFramework.Network
         /// 关闭并清理
         /// </summary>
         void Shutdown();
+        /// <summary>
+        /// 抛出接收包
+        /// </summary>
+        void FireReceivePacket(Packet packet);
     }
 }
