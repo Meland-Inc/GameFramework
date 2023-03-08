@@ -669,6 +669,14 @@ namespace GameFramework.Network
 
                 return true;
             }
+            /// <summary>
+            /// 广播包
+            /// </summary>
+            /// <param name="packet"></param>
+            public void FireReceivePacket(Packet packet)
+            {
+                m_ReceivePacketPool.Fire(this, packet);
+            }
         }
     }
 }
