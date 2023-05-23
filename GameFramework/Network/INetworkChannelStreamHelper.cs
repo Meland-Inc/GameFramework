@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 
 namespace GameFramework.Network
@@ -31,6 +32,6 @@ namespace GameFramework.Network
         /// <param name="source">要反序列化的来源流。</param>
         /// <param name="customErrorData">用户自定义错误数据。</param>
         /// <returns>反序列化后的消息包。</returns>
-        Packet DeserializePacket(IPacketHeader packetHeader, Stream source, out object customErrorData);
+        List<Packet> DeserializePacket(IPacketHeader packetHeader, Stream source, out object customErrorData);
     }
 }

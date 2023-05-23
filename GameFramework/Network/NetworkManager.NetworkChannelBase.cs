@@ -640,16 +640,19 @@ namespace GameFramework.Network
                 try
                 {
                     object customErrorData = null;
-                    Packet packet = m_NetworkChannelHelper.DeserializePacket(m_ReceiveState.PacketHeader, m_ReceiveState.Stream, out customErrorData);
+                    List<Packet> packets = m_NetworkChannelHelper.DeserializePacket(m_ReceiveState.PacketHeader, m_ReceiveState.Stream, out customErrorData);
 
                     if (customErrorData != null && NetworkChannelCustomError != null)
                     {
                         NetworkChannelCustomError(this, customErrorData);
                     }
 
-                    if (packet != null)
+                    for (int i = 0; i < packets.Count; i++)
                     {
-                        m_ReceivePacketPool.Fire(this, packet);
+                        if (packets[i] != null)
+                        {
+                            m_ReceivePacketPool.Fire(this, packets[i]);
+                        }
                     }
 
                     m_ReceiveState.PrepareForPacketHeader(m_NetworkChannelHelper.PacketHeaderLength);
