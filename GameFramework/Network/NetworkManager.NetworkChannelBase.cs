@@ -19,6 +19,7 @@ namespace GameFramework.Network
         /// </summary>
         private abstract class NetworkChannelBase : INetworkChannel, IDisposable
         {
+            private readonly List<Packet> _deserializePacketResults = new();
             private const float DefaultHeartBeatInterval = 30f;
 
             private readonly string m_Name;
@@ -640,16 +641,19 @@ namespace GameFramework.Network
                 try
                 {
                     object customErrorData = null;
-                    Packet packet = m_NetworkChannelHelper.DeserializePacket(m_ReceiveState.PacketHeader, m_ReceiveState.Stream, out customErrorData);
+                    m_NetworkChannelHelper.DeserializePacketNonAlloc(_deserializePacketResults, m_ReceiveState.PacketHeader, m_ReceiveState.Stream, out customErrorData);
 
                     if (customErrorData != null && NetworkChannelCustomError != null)
                     {
                         NetworkChannelCustomError(this, customErrorData);
                     }
 
-                    if (packet != null)
+                    for (int i = 0; i < _deserializePacketResults.Count; i++)
                     {
-                        m_ReceivePacketPool.Fire(this, packet);
+                        if (_deserializePacketResults[i] != null)
+                        {
+                            m_ReceivePacketPool.Fire(this, _deserializePacketResults[i]);
+                        }
                     }
 
                     m_ReceiveState.PrepareForPacketHeader(m_NetworkChannelHelper.PacketHeaderLength);

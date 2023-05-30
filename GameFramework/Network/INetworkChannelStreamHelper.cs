@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 
 namespace GameFramework.Network
@@ -27,10 +28,11 @@ namespace GameFramework.Network
         /// <summary>
         /// 反序列化消息包。
         /// </summary>
+        /// <param name="packetResults">装载结果集</param>
         /// <param name="packetHeader">消息包头。</param>
         /// <param name="source">要反序列化的来源流。</param>
         /// <param name="customErrorData">用户自定义错误数据。</param>
         /// <returns>反序列化后的消息包。</returns>
-        Packet DeserializePacket(IPacketHeader packetHeader, Stream source, out object customErrorData);
+        void DeserializePacketNonAlloc(List<Packet> packetResults, IPacketHeader packetHeader, Stream source, out object customErrorData);
     }
 }
