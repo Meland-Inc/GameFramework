@@ -16,7 +16,7 @@ namespace GameFramework.Fsm
     internal sealed class FsmManager : GameFrameworkModule, IFsmManager
     {
         private readonly Dictionary<TypeNamePair, FsmBase> m_Fsms;
-        private readonly List<FsmBase> m_TempFsms;
+        private readonly List<FsmBase> m_FsmList;//用来加速遍历 元素始终保持和m_Fsms一致
 
         /// <summary>
         /// 初始化有限状态机管理器的新实例。
@@ -24,7 +24,7 @@ namespace GameFramework.Fsm
         public FsmManager()
         {
             m_Fsms = new Dictionary<TypeNamePair, FsmBase>();
-            m_TempFsms = new List<FsmBase>();
+            m_FsmList = new List<FsmBase>();
         }
 
         /// <summary>
@@ -57,19 +57,14 @@ namespace GameFramework.Fsm
         /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
         internal override void Update(float elapseSeconds, float realElapseSeconds)
         {
-            m_TempFsms.Clear();
             if (m_Fsms.Count <= 0)
             {
                 return;
             }
 
-            foreach (KeyValuePair<TypeNamePair, FsmBase> fsm in m_Fsms)
+            for (int i = m_FsmList.Count - 1; i >= 0; i--)//倒序遍历，防止在Update中删除
             {
-                m_TempFsms.Add(fsm.Value);
-            }
-
-            foreach (FsmBase fsm in m_TempFsms)
-            {
+                FsmBase fsm = m_FsmList[i];
                 if (fsm.IsDestroyed)
                 {
                     continue;
@@ -90,7 +85,7 @@ namespace GameFramework.Fsm
             }
 
             m_Fsms.Clear();
-            m_TempFsms.Clear();
+            m_FsmList.Clear();
         }
 
         /// <summary>
@@ -203,14 +198,7 @@ namespace GameFramework.Fsm
         /// <returns>所有有限状态机。</returns>
         public FsmBase[] GetAllFsms()
         {
-            int index = 0;
-            FsmBase[] results = new FsmBase[m_Fsms.Count];
-            foreach (KeyValuePair<TypeNamePair, FsmBase> fsm in m_Fsms)
-            {
-                results[index++] = fsm.Value;
-            }
-
-            return results;
+            return m_FsmList.ToArray();
         }
 
         /// <summary>
@@ -225,10 +213,7 @@ namespace GameFramework.Fsm
             }
 
             results.Clear();
-            foreach (KeyValuePair<TypeNamePair, FsmBase> fsm in m_Fsms)
-            {
-                results.Add(fsm.Value);
-            }
+            results.AddRange(m_FsmList);
         }
 
         /// <summary>
@@ -261,6 +246,7 @@ namespace GameFramework.Fsm
 
             Fsm<T> fsm = Fsm<T>.Create(name, owner, states);
             m_Fsms.Add(typeNamePair, fsm);
+            m_FsmList.Add(fsm);
             return fsm;
         }
 
@@ -294,6 +280,7 @@ namespace GameFramework.Fsm
 
             Fsm<T> fsm = Fsm<T>.Create(name, owner, states);
             m_Fsms.Add(typeNamePair, fsm);
+            m_FsmList.Add(fsm);
             return fsm;
         }
 
@@ -402,6 +389,7 @@ namespace GameFramework.Fsm
             if (m_Fsms.TryGetValue(typeNamePair, out fsm))
             {
                 fsm.Shutdown();
+                m_FsmList.Remove(fsm);
                 return m_Fsms.Remove(typeNamePair);
             }
 
