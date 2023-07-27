@@ -178,10 +178,10 @@ namespace GameFramework.Entity
                 ReferencePool.Release(entityInfo);
             }
 
-            foreach (KeyValuePair<string, EntityGroup> entityGroup in m_EntityGroups)
-            {
-                entityGroup.Value.Update(elapseSeconds, realElapseSeconds);
-            }
+            // foreach (KeyValuePair<string, EntityGroup> entityGroup in m_EntityGroups)
+            // {
+            //     entityGroup.Value.Update(elapseSeconds, realElapseSeconds);
+            // }
         }
 
         /// <summary>

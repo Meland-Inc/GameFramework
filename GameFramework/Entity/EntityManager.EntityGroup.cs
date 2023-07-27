@@ -148,22 +148,22 @@ namespace GameFramework.Entity
                 }
             }
 
-            /// <summary>
-            /// 实体组轮询。
-            /// </summary>
-            /// <param name="elapseSeconds">逻辑流逝时间，以秒为单位。</param>
-            /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
-            public void Update(float elapseSeconds, float realElapseSeconds)
-            {
-                LinkedListNode<IEntity> current = m_Entities.First;
-                while (current != null)
-                {
-                    m_CachedNode = current.Next;
-                    current.Value.OnUpdate(elapseSeconds, realElapseSeconds);
-                    current = m_CachedNode;
-                    m_CachedNode = null;
-                }
-            }
+            // /// <summary>
+            // /// 实体组轮询。
+            // /// </summary>
+            // /// <param name="elapseSeconds">逻辑流逝时间，以秒为单位。</param>
+            // /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
+            // public void Update(float elapseSeconds, float realElapseSeconds)
+            // {
+            //     LinkedListNode<IEntity> current = m_Entities.First;
+            //     while (current != null)
+            //     {
+            //         m_CachedNode = current.Next;
+            //         current.Value.OnUpdate(elapseSeconds, realElapseSeconds);
+            //         current = m_CachedNode;
+            //         m_CachedNode = null;
+            //     }
+            // }
 
             /// <summary>
             /// 实体组中是否存在实体。

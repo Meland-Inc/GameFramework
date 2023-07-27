@@ -100,11 +100,11 @@ namespace GameFramework.Entity
         /// <param name="userData">用户自定义数据。</param>
         void OnDetachFrom(IEntity parentEntity, object userData);
 
-        /// <summary>
-        /// 实体轮询。
-        /// </summary>
-        /// <param name="elapseSeconds">逻辑流逝时间，以秒为单位。</param>
-        /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
-        void OnUpdate(float elapseSeconds, float realElapseSeconds);
+        // /// <summary>
+        // /// 实体轮询。
+        // /// </summary>
+        // /// <param name="elapseSeconds">逻辑流逝时间，以秒为单位。</param>
+        // /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
+        // void OnUpdate(float elapseSeconds, float realElapseSeconds);
     }
 }
