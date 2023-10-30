@@ -62,6 +62,8 @@ namespace GameFramework.Fsm
                 return;
             }
 
+            System.Exception exception = null;
+
             for (int i = m_FsmList.Count - 1; i >= 0; i--)//倒序遍历，防止在Update中删除
             {
                 FsmBase fsm = m_FsmList[i];
@@ -70,7 +72,20 @@ namespace GameFramework.Fsm
                     continue;
                 }
 
-                fsm.Update(elapseSeconds, realElapseSeconds);
+                try
+                {
+                    fsm.Update(elapseSeconds, realElapseSeconds);
+                }
+                catch (System.Exception e)
+                {
+                    exception ??= e;
+                    continue;
+                }
+            }
+
+            if (exception != null)
+            {
+                throw exception;
             }
         }
 

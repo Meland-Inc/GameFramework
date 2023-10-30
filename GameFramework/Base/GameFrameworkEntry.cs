@@ -24,9 +24,24 @@ namespace GameFramework
         /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
         public static void Update(float elapseSeconds, float realElapseSeconds)
         {
+            System.Exception exception = null;
+
             foreach (GameFrameworkModule module in s_GameFrameworkModules)
             {
-                module.Update(elapseSeconds, realElapseSeconds);
+                try
+                {
+                    module.Update(elapseSeconds, realElapseSeconds);
+                }
+                catch (System.Exception e)
+                {
+                    exception ??= e;
+                    continue;
+                }
+            }
+
+            if (exception != null)
+            {
+                throw exception;
             }
         }
 
