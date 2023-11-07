@@ -85,7 +85,7 @@ namespace GameFramework.Fsm
 
             if (exception != null)
             {
-                throw exception;
+                throw new Exception(exception.Message, exception);
             }
         }
 
