@@ -2,7 +2,7 @@
  * @Author: xiang huan
  * @Date: 2022-07-08 19:29:41
  * @Description: 服务器表专用
- * @FilePath: /meland-scene-server/Assets/Plugins/SharedCore/Thirdparty/GameFramework/GameFramework/DataTable/ServerDataTableManager.DataTable.cs
+ * @FilePath: /lumiterra-scene-server/Assets/Plugins/SharedCore/Thirdparty/GameFramework/GameFramework/DataTable/ServerDataTableManager.DataTable.cs
  * 
  */
 

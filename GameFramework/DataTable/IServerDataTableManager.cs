@@ -2,7 +2,7 @@
  * @Author: xiang huan
  * @Date: 2022-07-08 19:23:33
  * @Description: 服务器表专用管理接口
- * @FilePath: /meland-scene-server/Assets/Plugins/SharedCore/Thirdparty/GameFramework/GameFramework/DataTable/IServerDataTableManager.cs
+ * @FilePath: /lumiterra-scene-server/Assets/Plugins/SharedCore/Thirdparty/GameFramework/GameFramework/DataTable/IServerDataTableManager.cs
  * 
  */
 
