@@ -30,5 +30,6 @@ namespace GameFramework.Network
         /// </summary>
         Http,
         GraphQL,
+        Runtime,
     }
 }
