@@ -350,6 +350,11 @@ namespace GameFramework.UI
         /// <param name="userData">用户自定义数据。</param>
         /// <param name="disposed">是否释放</param>
         void CloseUIForm(IUIForm uiForm, object userData, bool disposed = false);
+        /// <summary>
+        /// 通过资源路径关闭界面，相比用serialId关闭，这个性能差一丢丢，能用serialId的尽量用serialId
+        /// </summary>
+        /// <param name="assetName">要关闭界面的资源路径</param>
+        void CloseUIForm(string assetName);
 
         /// <summary>
         /// 关闭所有已加载的界面。
