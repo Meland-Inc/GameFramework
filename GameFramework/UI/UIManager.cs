@@ -835,6 +835,36 @@ namespace GameFramework.UI
         }
 
         /// <summary>
+        /// 通过资源路径关闭界面，相比用serialId关闭，这个性能差一丢丢，能用serialId的尽量用serialId
+        /// </summary>
+        /// <param name="assetName">要关闭界面的资源路径</param>
+        public void CloseUIForm(string assetName)
+        {
+            foreach (IUIForm form in GetUIForms(assetName))
+            {
+                CloseUIForm(form);
+            }
+
+            //关闭正在加载中的界面
+            if (IsLoadingUIForm(assetName))
+            {
+                List<int> serialIds = new();
+                foreach (KeyValuePair<int, string> uiFormBeingLoaded in m_UIFormsBeingLoaded)
+                {
+                    if (uiFormBeingLoaded.Value == assetName)
+                    {
+                        serialIds.Add(uiFormBeingLoaded.Key);
+                    }
+                }
+
+                foreach (int serialId in serialIds)
+                {
+                    CloseUIForm(serialId);
+                }
+            }
+        }
+
+        /// <summary>
         /// 关闭界面。
         /// </summary>
         /// <param name="uiForm">要关闭的界面。</param>
