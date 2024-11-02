@@ -315,20 +315,13 @@ namespace GameFramework.UI
         /// </summary>
         /// <param name="serialId">要关闭界面的序列编号。</param>
         void CloseUIForm(int serialId);
-        /// <summary>
-        /// 关闭界面
-        /// </summary>
-        /// <param name="serialId">要关闭界面的序列编号。</param>
-        /// <param name="disposed">是否释放</param>
-        void CloseUIForm(int serialId, bool disposed);
 
         /// <summary>
         /// 关闭界面。
         /// </summary>
         /// <param name="serialId">要关闭界面的序列编号。</param>
         /// <param name="userData">用户自定义数据。</param>
-        /// <param name="disposed">是否释放</param>
-        void CloseUIForm(int serialId, object userData, bool disposed = false);
+        void CloseUIForm(int serialId, object userData);
 
         /// <summary>
         /// 关闭界面。
@@ -340,16 +333,8 @@ namespace GameFramework.UI
         /// 关闭界面。
         /// </summary>
         /// <param name="uiForm">要关闭的界面。</param>
-        /// <param name="disposed">是否释放</param>
-        void CloseUIForm(IUIForm uiForm, bool disposed);
-
-        /// <summary>
-        /// 关闭界面。
-        /// </summary>
-        /// <param name="uiForm">要关闭的界面。</param>
         /// <param name="userData">用户自定义数据。</param>
-        /// <param name="disposed">是否释放</param>
-        void CloseUIForm(IUIForm uiForm, object userData, bool disposed = false);
+        void CloseUIForm(IUIForm uiForm, object userData);
         /// <summary>
         /// 通过资源路径关闭界面，相比用serialId关闭，这个性能差一丢丢，能用serialId的尽量用serialId
         /// </summary>
