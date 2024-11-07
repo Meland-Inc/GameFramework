@@ -75,6 +75,11 @@ namespace GameFramework.UI
         /// <summary>
         /// 界面回收。
         /// </summary>
+        void OnDispose();
+
+        /// <summary>
+        /// 界面回收。
+        /// </summary>
         void OnRecycle();
 
         /// <summary>
