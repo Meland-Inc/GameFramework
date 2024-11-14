@@ -33,6 +33,7 @@ namespace GameFramework.Resource
             private readonly byte[] m_CachedHashBytes;
             private IObjectPool<AssetObject> m_AssetPool;
             private IObjectPool<ResourceObject> m_ResourcePool;
+            private readonly HashSet<string> _dependencyAssetLoadMark = new();//依赖资源加载标记,防止循环依赖的资源无限加载
 
             /// <summary>
             /// 初始化加载资源器的新实例。
@@ -332,9 +333,16 @@ namespace GameFramework.Resource
                     throw new GameFrameworkException(errorMessage);
                 }
 
+                _dependencyAssetLoadMark.Clear();
+                _ = _dependencyAssetLoadMark.Add(assetName);
                 LoadAssetTask mainTask = LoadAssetTask.Create(assetName, assetType, priority, resourceInfo, dependencyAssetNames, loadAssetCallbacks, userData);
                 foreach (string dependencyAssetName in dependencyAssetNames)
                 {
+                    if (_dependencyAssetLoadMark.Contains(dependencyAssetName))
+                    {
+                        continue;
+                    }
+
                     if (!LoadDependencyAsset(dependencyAssetName, priority, mainTask, userData))
                     {
                         string errorMessage = Utility.Text.Format("Can not load dependency asset '{0}' when load asset '{1}'.", dependencyAssetName, assetName);
@@ -399,9 +407,16 @@ namespace GameFramework.Resource
                     throw new GameFrameworkException(errorMessage);
                 }
 
+                _dependencyAssetLoadMark.Clear();
+                _ = _dependencyAssetLoadMark.Add(sceneAssetName);
                 LoadSceneTask mainTask = LoadSceneTask.Create(sceneAssetName, priority, resourceInfo, dependencyAssetNames, loadSceneCallbacks, userData);
                 foreach (string dependencyAssetName in dependencyAssetNames)
                 {
+                    if (_dependencyAssetLoadMark.Contains(dependencyAssetName))
+                    {
+                        continue;
+                    }
+
                     if (!LoadDependencyAsset(dependencyAssetName, priority, mainTask, userData))
                     {
                         string errorMessage = Utility.Text.Format("Can not load dependency asset '{0}' when load scene '{1}'.", dependencyAssetName, sceneAssetName);
@@ -811,6 +826,11 @@ namespace GameFramework.Resource
                     throw new GameFrameworkException("Main task is invalid.");
                 }
 
+                if (_dependencyAssetLoadMark.Contains(assetName))
+                {
+                    return true;
+                }
+
                 ResourceInfo resourceInfo = null;
                 string[] dependencyAssetNames = null;
                 if (!CheckAsset(assetName, out resourceInfo, out dependencyAssetNames))
@@ -824,6 +844,7 @@ namespace GameFramework.Resource
                 }
 
                 LoadDependencyAssetTask dependencyTask = LoadDependencyAssetTask.Create(assetName, priority, resourceInfo, dependencyAssetNames, mainTask, userData);
+                _ = _dependencyAssetLoadMark.Add(assetName);
                 foreach (string dependencyAssetName in dependencyAssetNames)
                 {
                     if (!LoadDependencyAsset(dependencyAssetName, priority, dependencyTask, userData))
