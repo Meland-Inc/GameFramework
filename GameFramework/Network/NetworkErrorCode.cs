@@ -55,6 +55,10 @@ namespace GameFramework.Network
         /// <summary>
         /// 反序列化消息包错误。
         /// </summary>
-        DeserializePacketError
+        DeserializePacketError,
+        /// <summary>
+        /// 连接超时。
+        /// </summary>
+        ConnectTimeout,
     }
 }
